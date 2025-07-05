@@ -1,3 +1,4 @@
+import math
 from enum import Enum, auto
 from abc import ABC, abstractmethod
 import pygame
@@ -7,19 +8,19 @@ import time
 class Sprite:
     def __init__(self, path: str):
         self.surface = pygame.image.load(path)
-        self.width = self.surface.get_width()
-        self.height = self.surface.get_height()
+        self.size = pygame.math.Vector2(self.surface.get_size())
 
-    def draw(self, x: int, y: int) -> None:
-        pygame.display.get_surface().blit(self.surface, (x, y))
+    def draw(self, pos: pygame.math.Vector2, rotation: float = 0.0) -> None:
+        rotated_surface = pygame.transform.rotate(self.surface, -rotation * 180 / math.pi)
+        rect = rotated_surface.get_rect(center=pos + self.size * 0.5)
+        pygame.display.get_surface().blit(rotated_surface, rect)
 
-    def get_size(self) -> tuple[int, int]:
-        return self.width, self.height
+    def get_size(self) -> pygame.math.Vector2:
+        return self.size
 
-    def set_size(self, w: int, h: int) -> None:
-        self.surface = pygame.transform.scale(self.surface, (w, h))
-        self.width = w
-        self.height = h
+    def set_size(self, size: pygame.math.Vector2) -> None:
+        self.surface = pygame.transform.scale(self.surface, size)
+        self.size = size
 
     def destroy(self) -> None:
         del self

@@ -1,35 +1,31 @@
 import pygame
+from pygame import Vector2
 
 import GameFramework
 from GameFramework import Framework, FRKey, Sprite
 
-
 class MyGame(Framework):
     def __init__(self):
         self.font = None
-        self.bonus = None
-        self.head = None
-        self.body = None
-        self.FIELD_SIZE = 10
-        self.cell_width = 640 // self.FIELD_SIZE
-        self.cell_height = 640 // self.FIELD_SIZE
-        self.head_x = 5
-        self.head_y = 5
+        self.head: Sprite | None = None
+        self.window_size = Vector2(640, 640)
+        self.FIELD_SIZE = 11
+        self.cell_size = Vector2(self.window_size // self.FIELD_SIZE)
+        self.head_pos = Vector2(5, 5)
 
     def PreInit(self) -> tuple[int, int, bool]:
         pygame.font.init()
-        return 640, 640, False
-
+        return int(self.window_size.x), int(self.window_size.y), False
 
     def Init(self) -> bool:
         self.font = pygame.font.SysFont('Arial', 10)
         self.head = Sprite("images/head.png")
-        self.head.set_size(self.cell_width, self.cell_height)
+        self.head.set_size(self.cell_size)
         return True
 
     def Tick(self) -> bool:
         self.draw_test_field()
-        self.head.draw(self.head_x * self.cell_width, self.head_y * self.cell_height)
+        self.head.draw(Vector2(self.head_pos.x * self.cell_size.x, self.head_pos.y * self.cell_size.y))
         return False
 
     def draw_test_field(self):
@@ -37,9 +33,10 @@ class MyGame(Framework):
         for y in range(self.FIELD_SIZE):
             for x in range(self.FIELD_SIZE):
                 color = (200, 200, 200) if (x + y) % 2 == 0 else (150, 150, 150)
-                pygame.draw.rect(surface, color, (x * self.cell_width, y * self.cell_height, self.cell_width, self.cell_height))
+                pos = Vector2(self.cell_size.x * x, self.cell_size.y * y)
+                pygame.draw.rect(surface, color,(pos, self.cell_size))
                 text = self.font.render(f'({x}, {y})', True, (0, 0, 0))
-                surface.blit(text, (x * self.cell_width, y * self.cell_height))
+                surface.blit(text, pos)
 
     def onMouseMove(self, x: int, y: int, xrelative: int, yrelative: int) -> None:
         pass
@@ -50,13 +47,13 @@ class MyGame(Framework):
     def onKeyPressed(self, key: FRKey) -> None:
         match key:
             case FRKey.RIGHT:
-                self.head_x += 1
+                self.head_pos.x += 1
             case FRKey.LEFT:
-                self.head_x -= 1
+                self.head_pos.x -= 1
             case FRKey.DOWN:
-                self.head_y += 1
+                self.head_pos.y += 1
             case FRKey.UP:
-                self.head_y -= 1
+                self.head_pos.y -= 1
 
     def onKeyReleased(self, k: FRKey) -> None:
         pass

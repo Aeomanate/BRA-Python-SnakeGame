@@ -19,7 +19,7 @@ class MyGame(Framework):
         return int(self.window_size.x), int(self.window_size.y), False
 
     def Init(self) -> bool:
-        SPRITE_FACTORY.init('images')
+        SPRITE_FACTORY.init('images', self.field.cell_size)
         self.font = pygame.font.SysFont('Arial', 10)
         self.snake.init(self.field.cell_size)
         return True

@@ -1,8 +1,9 @@
 import pygame
 from pygame import Vector2
 
-import GameFramework
-from GameFramework import Framework, FRKey, Sprite
+from src.ThirdParty import GameFramework
+from src.ThirdParty.GameFramework import Framework, Sprite, FRKey
+
 
 class MyGame(Framework):
     def __init__(self):

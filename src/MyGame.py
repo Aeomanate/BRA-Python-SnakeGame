@@ -1,34 +1,32 @@
 import pygame
 from pygame import Vector2
 
+from src.DrawDelegates.SpriteFactory import SPRITE_FACTORY
 from src.Simulation.Field import Field
+from src.Simulation.Snake import Snake
 from src.ThirdParty import GameFramework
 from src.ThirdParty.GameFramework import Framework, Sprite, FRKey
-
 
 class MyGame(Framework):
     def __init__(self):
         self.font = None
-        self.head: Sprite | None = None
         self.window_size = Vector2(640, 640)
         self.field = Field(self.window_size, 11)
-        # self.FIELD_SIZE = 11
-        # self.cell_size = Vector2(self.window_size // self.FIELD_SIZE)
-        self.head_pos = Vector2(5, 5)
+        self.snake = Snake(Vector2(self.field.cells//2, self.field.cells//2))
 
     def PreInit(self) -> tuple[int, int, bool]:
         pygame.font.init()
         return int(self.window_size.x), int(self.window_size.y), False
 
     def Init(self) -> bool:
+        SPRITE_FACTORY.init('images')
         self.font = pygame.font.SysFont('Arial', 10)
-        self.head = Sprite("images/head.png")
-        self.head.set_size(self.field.cell_size)
+        self.snake.init(self.field.cell_size)
         return True
 
     def Tick(self) -> bool:
         self.draw_test_field()
-        self.head.draw(Vector2(self.head_pos.x * self.field.cell_size.x, self.head_pos.y * self.field.cell_size.y))
+        self.snake.draw(self.field.cell_size)
         return False
 
     def draw_test_field(self):

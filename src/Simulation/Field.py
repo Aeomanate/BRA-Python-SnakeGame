@@ -7,3 +7,4 @@ class Field:
         self.cell_size = Vector2(640 // self.FIELD_SIZE)
         self.window_size: Vector2 = window_size_px
         self.cells: int = cells
+

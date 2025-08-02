@@ -5,12 +5,20 @@ from src.DrawDelegates.SpriteFactory import SPRITE_FACTORY
 from src.Simulation.Field import Field
 from src.Simulation.Snake import Snake
 from src.ThirdParty import GameFramework
-from src.ThirdParty.GameFramework import Framework, Sprite, FRKey
+from src.ThirdParty.GameFramework import Framework, FRKey
+
+from src.Simulation.Simulation import Simulation
+from src.DrawDelegates.DrawerPygame import DrawerPygame
+
 
 class MyGame(Framework):
     def __init__(self):
         self.font = None
         self.window_size = Vector2(640, 640)
+        self.simulation = None
+        self.drawer = DrawerPygame()
+        self.game_over = False
+        self.score = 0
         self.field = Field(self.window_size, 11)
         self.snake = Snake(Vector2(self.field.cells//2, self.field.cells//2))
 
@@ -22,11 +30,23 @@ class MyGame(Framework):
         SPRITE_FACTORY.init('images', self.field.cell_size)
         self.font = pygame.font.SysFont('Arial', 10)
         self.snake.init(self.field.cell_size)
+        self.simulation = Simulation(self.FIELD_SIZE, self.window_size)
         return True
 
     def Tick(self) -> bool:
         self.draw_test_field()
         self.snake.draw(self.field.cell_size)
+
+        if self.game_over:
+            self.show_game_over()
+            return False
+
+        if not self.simulation.update(pygame.time.get_ticks()):
+            self.game_over = True
+            return False
+
+        self.simulation.draw(self.drawer, self.font)
+        self.score = len(self.simulation.snake.body) - 1
         return False
 
     def draw_test_field(self):
@@ -46,15 +66,38 @@ class MyGame(Framework):
         pass
 
     def onKeyPressed(self, key: FRKey) -> None:
-        match key:
-            case FRKey.RIGHT:
-                self.head_pos.x += 1
-            case FRKey.LEFT:
-                self.head_pos.x -= 1
-            case FRKey.DOWN:
-                self.head_pos.y += 1
-            case FRKey.UP:
-                self.head_pos.y -= 1
+        if self.game_over and (key == FRKey.SPACE or key in [FRKey.UP, FRKey.DOWN, FRKey.LEFT, FRKey.RIGHT]):
+            self.restart_game()
+            return
+
+        direction = None
+        if key == FRKey.RIGHT:
+            direction = Vector2(1, 0)
+        elif key == FRKey.LEFT:
+            direction = Vector2(-1, 0)
+        elif key == FRKey.DOWN:
+            direction = Vector2(0, 1)
+        elif key == FRKey.UP:
+            direction = Vector2(0, -1)
+        if direction:
+            self.simulation.set_direction(direction)
+    def show_game_over(self):
+        surface = pygame.display.get_surface()
+        surface.fill((0, 0, 0))
+        msg1 = f"Game Over! Ваш счёт: {self.score}"
+        msg2 = "Нажмите пробел или Enter для перезапуска"
+        font_big = pygame.font.SysFont('Arial', 32)
+        font_small = pygame.font.SysFont('Arial', 20)
+        text1 = font_big.render(msg1, True, (255, 0, 0))
+        text2 = font_small.render(msg2, True, (255, 255, 255))
+        surface.blit(text1, (self.window_size.x // 2 - text1.get_width() // 2, self.window_size.y // 2 - 40))
+        surface.blit(text2, (self.window_size.x // 2 - text2.get_width() // 2, self.window_size.y // 2 + 10))
+        pygame.display.flip()
+
+    def restart_game(self):
+        self.simulation = Simulation(self.FIELD_SIZE, self.window_size)
+        self.game_over = False
+        self.score = 0
 
     def onKeyReleased(self, k: FRKey) -> None:
         pass

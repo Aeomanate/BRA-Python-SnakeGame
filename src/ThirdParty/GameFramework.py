@@ -30,6 +30,7 @@ class FRKey(Enum):
     LEFT = auto()
     DOWN = auto()
     UP = auto()
+    SPACE = auto()
     COUNT = auto()
 
 class FRMouseButton(Enum):
@@ -136,6 +137,10 @@ def run(framework: Framework) -> int:
                     key = FRKey.DOWN
                 elif event.key == pygame.K_UP:
                     key = FRKey.UP
+                elif event.key == pygame.K_SPACE:
+                    key = FRKey.SPACE
+                elif event.key == pygame.K_RETURN:
+                    key = FRKey.SPACE  # Используем SPACE как общую клавишу перезапуска
 
                 if key:
                     if event.type == pygame.KEYDOWN:

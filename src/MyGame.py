@@ -15,28 +15,23 @@ class MyGame(Framework):
     def __init__(self):
         self.font = None
         self.window_size = Vector2(640, 640)
+        self.FIELD_SIZE = 11
         self.simulation = None
-        self.drawer = DrawerPygame()
         self.game_over = False
         self.score = 0
-        self.field = Field(self.window_size, 11)
-        self.snake = Snake(Vector2(self.field.cells//2, self.field.cells//2))
+        self.drawer = None
 
     def PreInit(self) -> tuple[int, int, bool]:
         pygame.font.init()
         return int(self.window_size.x), int(self.window_size.y), False
 
     def Init(self) -> bool:
-        SPRITE_FACTORY.init('images', self.field.cell_size)
-        self.font = pygame.font.SysFont('Arial', 10)
-        self.snake.init(self.field.cell_size)
         self.simulation = Simulation(self.FIELD_SIZE, self.window_size)
+        self.drawer = DrawerPygame(self.simulation.field.cell_size)
+        SPRITE_FACTORY.init('images', self.simulation.field.cell_siz)
         return True
 
     def Tick(self) -> bool:
-        self.draw_test_field()
-        self.snake.draw(self.field.cell_size)
-
         if self.game_over:
             self.show_game_over()
             return False
@@ -48,16 +43,6 @@ class MyGame(Framework):
         self.simulation.draw(self.drawer, self.font)
         self.score = len(self.simulation.snake.body) - 1
         return False
-
-    def draw_test_field(self):
-        surface = pygame.display.get_surface()
-        for y in range(self.field.FIELD_SIZE):
-            for x in range(self.field.FIELD_SIZE):
-                color = (200, 200, 200) if (x + y) % 2 == 0 else (150, 150, 150)
-                pos = Vector2(self.field.cell_size.x * x, self.field.cell_size.y * y)
-                pygame.draw.rect(surface, color,(pos, self.field.cell_size))
-                text = self.font.render(f'({x}, {y})', True, (0, 0, 0))
-                surface.blit(text, pos)
 
     def onMouseMove(self, x: int, y: int, xrelative: int, yrelative: int) -> None:
         pass
@@ -81,6 +66,7 @@ class MyGame(Framework):
             direction = Vector2(0, -1)
         if direction:
             self.simulation.set_direction(direction)
+
     def show_game_over(self):
         surface = pygame.display.get_surface()
         surface.fill((0, 0, 0))

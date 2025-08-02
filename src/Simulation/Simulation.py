@@ -1,4 +1,4 @@
-
+from src.Patterns.Visitor import Visitable, Visitor
 from src.Simulation.Field import Field
 from src.Simulation.Snake import Snake, CollisionException
 from pygame import Vector2
@@ -7,24 +7,20 @@ from pygame import Vector2
 
 from src.Simulation.Bonus import Bonus
 
-class Simulation:
+class Simulation(Visitable):
     def __init__(self, field_size: int, window_size: Vector2):
-        self.cell_size = Vector2(window_size // field_size)
-        self.field = Field(field_size, self.cell_size)
-        self.snake = Snake(Vector2(field_size // 2, field_size // 2), self.cell_size)
-        self.bonus = Bonus(field_size)
+        self.field = Field(window_size, field_size)
+        self.snake = Snake(Vector2(field_size // 2, field_size // 2))
         self.field_size = field_size
         self.last_update = 0
         self.move_interval = 200
         self.current_direction = Vector2(1, 0)
+        self.bonus = Bonus(field_size)
 
-    def draw(self, drawer, font):
-        import pygame
-        surface = pygame.display.get_surface()
-        surface.fill((128, 128, 128))
-        drawer.draw_field(self.field.size, self.field.cell_size, font)
-        drawer.draw_snake(self.snake.get_segments_with_directions(), self.snake.cell_size)
-        drawer.draw_bonus(self.bonus.get_position(), self.field.cell_size)
+    def visit(self, visitor: Visitor):
+        visitor.accept(self.field)
+        visitor.accept(self.snake)
+        visitor.accept(self.bonus)
         
     def update(self, current_time):
         if current_time - self.last_update >= self.move_interval:

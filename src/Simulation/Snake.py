@@ -1,18 +1,29 @@
+from dataclasses import dataclass
 
 from pygame import Vector2
 
 from src.DrawDelegates.SpriteFactory import SPRITE_FACTORY
+from src.Patterns.Visitor import Visitable
 from src.ThirdParty.GameFramework import Sprite
 
+@dataclass
+class DirInOut:
+    dir_in: Vector2
+    dir_out: Vector2
+
+@dataclass
+class Segment:
+    type: str
+    pos: Vector2
+    dir: Vector2 | DirInOut
 
 class CollisionException(Exception):
     pass
 
 
-class Snake:
-    def __init__(self, start_pos: Vector2, cell_size: Vector2):
+class Snake(Visitable):
+    def __init__(self, start_pos: Vector2):
         self.body = [start_pos.copy()]
-        self.cell_size = cell_size
         self.grow_pending = 0
         self.last_direction = Vector2(1, 0)
 
@@ -46,38 +57,13 @@ class Snake:
         for i, pos in enumerate(self.body):
             if i == 0:
                 direction = self.body[0] - self.body[1] if n > 1 else self.last_direction
-                segments.append({
-                    'type': 'head',
-                    'pos': pos,
-                    'dir': direction
-                })
+                segments.append(Segment('head', pos, direction))
             elif i == n - 1:
                 direction = self.body[-2] - self.body[-1] if n > 1 else Vector2(0, 0)
-                segments.append({
-                    'type': 'tail',
-                    'pos': pos,
-                    'dir': direction
-                })
+                segments.append(Segment('tail', pos, direction))
             else:
                 prev_dir = self.body[i-1] - pos
                 next_dir = pos - self.body[i+1]
-                segments.append({
-                    'type': 'body',
-                    'pos': pos,
-                    'dir_in': prev_dir,
-                    'dir_out': next_dir
-                })
+                segments.append(Segment('head', pos, DirInOut(next_dir, prev_dir)))
         return segments
-
-    def draw(self, cell_size) -> bool:
-        for index, peace in enumerate(self.body):
-            match index + 1:
-                case 1:
-                    SPRITE_FACTORY.get_sprite('head').draw(Vector2(peace.x * cell_size.x, peace.y * cell_size.y))
-                case len(self.body):
-                    SPRITE_FACTORY.get_sprite('tail').draw(Vector2(peace.x * cell_size.x, peace.y * cell_size.y))
-                case _:
-                    SPRITE_FACTORY.get_sprite('body').draw(Vector2(peace.x * cell_size.x, peace.y * cell_size.y))
-
-        return False
 

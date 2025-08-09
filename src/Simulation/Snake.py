@@ -59,8 +59,7 @@ class Snake(Visitable):
                 direction = self.body[-2] - self.body[-1] if n > 1 else Vector2(0, 0)
                 segments.append(Segment('tail', pos, direction))
             else:
-                prev_dir = self.body[i-1] - pos
-                next_dir = pos - self.body[i+1]
-                segments.append(Segment('head', pos, DirInOut(next_dir, prev_dir)))
+                direction = self.body[i - 1] - self.body[i + 1]
+                segments.append(Segment('body', pos, direction))
         return segments
 

@@ -35,7 +35,7 @@ class DrawerPygame(Visitor):
 
     @accept.register
     def _(self, snake: Snake):
-        segments = snake.get_segments()
+        segments = snake.generate_segments()
         cell_size = self.cell_size
 
         def vector_to_angle(vec):

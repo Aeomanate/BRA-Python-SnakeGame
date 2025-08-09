@@ -6,16 +6,13 @@ from src.DrawDelegates.SpriteFactory import SPRITE_FACTORY
 from src.Patterns.Visitor import Visitable
 from src.ThirdParty.GameFramework import Sprite
 
-@dataclass
-class DirInOut:
-    dir_in: Vector2
-    dir_out: Vector2
+
 
 @dataclass
 class Segment:
     type: str
     pos: Vector2
-    dir: Vector2 | DirInOut
+    dir: Vector2
 
 class CollisionException(Exception):
     pass
@@ -51,7 +48,7 @@ class Snake(Visitable):
     def get_positions(self):
         return self.body
 
-    def get_segments_with_directions(self):
+    def get_segments(self):
         segments = []
         n = len(self.body)
         for i, pos in enumerate(self.body):
@@ -62,8 +59,7 @@ class Snake(Visitable):
                 direction = self.body[-2] - self.body[-1] if n > 1 else Vector2(0, 0)
                 segments.append(Segment('tail', pos, direction))
             else:
-                prev_dir = self.body[i-1] - pos
-                next_dir = pos - self.body[i+1]
-                segments.append(Segment('head', pos, DirInOut(next_dir, prev_dir)))
+                direction = self.body[i - 1] - self.body[i + 1]
+                segments.append(Segment('body', pos, direction))
         return segments
 

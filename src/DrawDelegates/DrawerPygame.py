@@ -33,21 +33,9 @@ class DrawerPygame(Visitor):
                 text = FONT.font.render(text_str, True, (128, 128, 128))
                 surface.blit(text, rect.topleft)
 
-    def draw(self, cell_size) -> bool:
-        for index, peace in enumerate(self.body):
-            match index + 1:
-                case 1:
-                    SPRITE_FACTORY.get_sprite('head').draw(Vector2(peace.x * cell_size.x, peace.y * cell_size.y))
-                case len(self.body):
-                    SPRITE_FACTORY.get_sprite('tail').draw(Vector2(peace.x * cell_size.x, peace.y * cell_size.y))
-                case _:
-                    SPRITE_FACTORY.get_sprite('body').draw(Vector2(peace.x * cell_size.x, peace.y * cell_size.y))
-
-        return False
-
     @accept.register
     def _(self, snake: Snake):
-        segments = snake.get_segments_with_directions()
+        segments = snake.get_segments()
         cell_size = self.cell_size
 
         def vector_to_angle(vec):
@@ -66,49 +54,17 @@ class DrawerPygame(Visitor):
         if n == 1:
             seg = segments[0]
             pos = Vector2(seg.pos.x * cell_size.x, seg.pos.y * cell_size.y)
-            sprite = SPRITE_FACTORY.get_head_sprite(cell_size)
+            sprite = SPRITE_FACTORY.get_sprite('head')
             angle = vector_to_angle(seg.dir)
             sprite.draw(pos, angle)
             return
 
         for i, seg in enumerate(segments):
-
             sprite = SPRITE_FACTORY.get_sprite(seg.type)
-            angle = vector_to_angle(seg.dir_in) if seg.dir_in == seg.dir_out else turn_angle(seg.dir_in, seg.dir_out)
-
-            match seg.type:
-                case ('head' | 'tail' | 'body') if n != 2:
-                    if seg.type == 'body':
-                        angle = vector_to_angle(seg.dir_in) if seg.dir_in == seg.dir_out else turn_angle(seg.dir_in,
-                                                                                                         seg.dir_out)
-                case 'body':
-                    continue
-
-                case _:
-                    continue
-
-            if and n != 2:
-                sprite = SPRITE_FACTORY.get_sprite(seg.type)
-                if seg.type == 'body':
-                    angle = vector_to_angle(seg.dir_in) if seg.dir_in == seg.dir_out else turn_angle(seg.dir_in, seg.dir_out)
-                else:
-                    angle = vector_to_angle(seg.dir)
-
             pos = Vector2(seg.pos.x * cell_size.x, seg.pos.y * cell_size.y)
-            if :
-                sprite = SPRITE_FACTORY.get_sprite(seg.type)
-                angle = vector_to_angle(seg.dir)
-            elif seg.type == 'body':
-                if n == 2:
-                    continue
-                if seg.dir_in == seg.dir_out:
-                    sprite = SPRITE_FACTORY.get_sprite(seg.type)
-                    angle = vector_to_angle(seg.dir_in)
-                else:
-                    sprite = SPRITE_FACTORY.get_sprite(seg.type)
-                    angle = turn_angle(seg.dir_in, seg.dir_out)
-            else:
-                continue
+            angle = vector_to_angle(seg.dir_in) if seg.dir_in == seg.dir_out else turn_angle(seg.dir_in, seg.dir_out)
+            if seg.type == 'body' and n != 2:
+                angle = vector_to_angle(seg.dir_in) if seg.dir_in == seg.dir_out else turn_angle(seg.dir_in, seg.dir_out)
             sprite.draw(pos, angle)
 
     @accept.register

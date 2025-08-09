@@ -1,9 +1,11 @@
 import pygame
 from pygame import Vector2
 
+from src.DrawDelegates.Font import FONT
 from src.DrawDelegates.SpriteFactory import SPRITE_FACTORY
 from src.Simulation.Field import Field
 from src.Simulation.Snake import Snake
+
 from src.ThirdParty import GameFramework
 from src.ThirdParty.GameFramework import Framework, FRKey
 
@@ -28,7 +30,8 @@ class MyGame(Framework):
     def Init(self) -> bool:
         self.simulation = Simulation(self.FIELD_SIZE, self.window_size)
         self.drawer = DrawerPygame(self.simulation.field.cell_size)
-        SPRITE_FACTORY.init('images', self.simulation.field.cell_siz)
+        SPRITE_FACTORY.init('images', self.simulation.field.cell_size)
+        FONT.init()
         return True
 
     def Tick(self) -> bool:
@@ -40,7 +43,7 @@ class MyGame(Framework):
             self.game_over = True
             return False
 
-        self.simulation.draw(self.drawer, self.font)
+        self.simulation.visit(self.drawer)
         self.score = len(self.simulation.snake.body) - 1
         return False
 

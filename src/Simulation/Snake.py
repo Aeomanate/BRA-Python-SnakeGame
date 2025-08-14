@@ -23,6 +23,7 @@ class Snake(Visitable):
         self.body = [start_pos.copy()]
         self.grow_pending = 0
         self.last_direction = Vector2(1, 0)
+        self.__seg_names = ["head", "body", "tail"]
 
     def move(self, direction: Vector2):
         new_head = self.body[0] + direction
@@ -48,18 +49,18 @@ class Snake(Visitable):
     def get_positions(self):
         return self.body
 
-    def get_segments(self):
+    def generate_segments(self):
+        seg_names = {0: "head", len(self.body) - 1: "tail"}
         segments = []
         n = len(self.body)
         for i, pos in enumerate(self.body):
-            if i == 0:
-                direction = self.body[0] - self.body[1] if n > 1 else self.last_direction
-                segments.append(Segment('head', pos, direction))
-            elif i == n - 1:
-                direction = self.body[-2] - self.body[-1] if n > 1 else Vector2(0, 0)
-                segments.append(Segment('tail', pos, direction))
+            cur_seg_name = seg_names.get(i, "body")
+            offset = 1 - 2 * int(i < n - 1)
+            neighbor_index = i + offset
+            if 0 <= neighbor_index < n:
+                cur_seg_dir = self.body[i] - self.body[neighbor_index]
             else:
-                direction = self.body[i - 1] - self.body[i + 1]
-                segments.append(Segment('body', pos, direction))
+                cur_seg_dir = Vector2(0, 0)
+            segments.append(Segment(cur_seg_name, pos, cur_seg_dir))
         return segments
 
